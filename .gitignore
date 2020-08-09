@@ -3,3 +3,7 @@
 *.vcxproj*
 
 Debug/
+
+*.dll
+
+*.sln

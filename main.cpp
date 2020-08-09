@@ -25,35 +25,60 @@ Modified from starter template.
 
 
 
-#include <SDL2/SDL.h>
-
+#include <SDL.h>
+#include "SDL_image.h"
 #include <iostream>
 #include <vector>
 
-int main()
+int main(int argc, char *args[])
 {
-    // Create an SDL window that supports Vulkan rendering.
+    // Create an SDL window 
     if(SDL_Init(SDL_INIT_VIDEO) != 0) {
         std::cout << "Could not initialize SDL." << std::endl;
         return 1;
     }
     SDL_Window* window = SDL_CreateWindow("View Window", SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_VULKAN);
+        SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_SHOWN);
     if(window == NULL) {
         std::cout << "Could not create SDL window." << std::endl;
         return 1;
     }
 
-    // Get WSI extensions from SDL (we can add more if we like - we just can't remove these)
-    unsigned extension_count;
+    SDL_Renderer* viewRender = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (viewRender == NULL) {
+        SDL_DestroyWindow(window);
+        std::cout << "Render creation error: " << SDL_GetError() << std::endl;
+        SDL_Quit();
+        return 1;
+    }
 
-    // Use validation layers if this is a debug build
-    std::vector<const char*> layers;
+/*    SDL_Surface *testBmp = IMG_Load("./testImages/fruit-painting.bmp");
+    if (testBmp == nullptr){
+		SDL_DestroyRenderer(viewRender);
+		SDL_DestroyWindow(window);
+		std::cout << "SDL_LoadBMP Error: " << SDL_GetError() << std::endl;
+		SDL_Quit();
+		return 1;
+	} */
+    std::string p = "testImages/shapes-1.png";
+    SDL_Texture* testTexture = IMG_LoadTexture(viewRender, p.c_str());
+
+    if (testTexture == NULL) {
+		SDL_DestroyRenderer(viewRender);
+		SDL_DestroyWindow(window);
+		std::cout << "SDL_LoadBMP Error: " << SDL_GetError() << std::endl;
+		SDL_Quit();
+		return 1;
+    }
+
+
 #if defined(_DEBUG)
-    layers.push_back("VK_LAYER_KHRONOS_validation");
+    
 #endif
 
    // This is where most initializtion for a program should be performed
+   SDL_Rect dst;
+   SDL_QueryTexture(testTexture, NULL, NULL, &dst.w, &dst.h);
 
     // Poll for user input.
     bool stillRunning = true;
@@ -70,14 +95,19 @@ int main()
 
             default:
                 // Do nothing.
-                break;
+                stillRunning = true;
             }
         }
+        SDL_RenderClear(viewRender);
+        SDL_RenderCopy(viewRender, testTexture, NULL, NULL);
+        SDL_RenderPresent(viewRender);
 
-        SDL_Delay(10);
+        SDL_Delay(100);
     }
 
     // Clean up.
+    SDL_DestroyTexture(testTexture);
+    SDL_DestroyRenderer(viewRender);
     SDL_DestroyWindow(window);
     SDL_Quit();
 
