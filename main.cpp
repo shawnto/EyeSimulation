@@ -75,7 +75,7 @@ int main(int argc, char *args[])
     //std::string p = "testImages/shapes-1.png";
    // SDL_Texture* testTexture = IMG_LoadTexture(viewRender, p.c_str());
 
-    SDL_Texture* rodTexture = SDL_CreateTexture(visionRender, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, worldSize.width, worldSize.height);
+    SDL_Texture* rodTexture = SDL_CreateTexture(visionRender, SDL_PIXELFORMAT_BGR24, SDL_TEXTUREACCESS_STREAMING, worldSize.width, worldSize.height);
     SDL_SetTextureBlendMode(rodTexture, SDL_BLENDMODE_BLEND);
     if (validate_creation(rodTexture, "rodTexture")) {
         cleanup(visionRender, visionWindow);
@@ -118,10 +118,10 @@ int main(int argc, char *args[])
             SDL_LockTexture(rodTexture, NULL, &texPixels, &texPitch);
             std::memcpy(texPixels, frameRef.data, frameRef.elemSize() * frameRef.size().height * frameRef.size().width);
             SDL_UnlockTexture(rodTexture);
-            renderTexture(rodTexture, visionRender, 540, 360);
+            renderTexture(rodTexture, visionRender, 0, 0);
             SDL_RenderPresent(visionRender);
 
-            SDL_Delay(500);
+            SDL_Delay(50);
         }
     }
 
