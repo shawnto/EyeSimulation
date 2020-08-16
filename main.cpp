@@ -16,6 +16,7 @@ Modified from starter template.
 #include "world_in.h"
 #include "cleanup.h"
 #include "rod.h"
+#include "cone.h"
 #include <string>
 
 
@@ -54,7 +55,7 @@ int main(int argc, char *args[])
         return 1;
     }
     SDL_Window* visionWindow = SDL_CreateWindow("Vision Window", SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED, 1920 /2, 1080/2, SDL_WINDOW_SHOWN);
+        SDL_WINDOWPOS_CENTERED, 800, 800, SDL_WINDOW_SHOWN);
     if (validate_creation(visionWindow, "vision window")) {
         SDL_Quit();
         return 1;
@@ -76,17 +77,6 @@ int main(int argc, char *args[])
         return 1;
     }
 
-    //std::string p = "testImages/shapes-1.png";
-   // SDL_Texture* testTexture = IMG_LoadTexture(viewRender, p.c_str());
-    /*cv::Mat frameRef = worldIn.getNextFrame();
-    SDL_Texture* rodTexture = SDL_CreateTexture(visionRender, SDL_PIXELFORMAT_BGR24, SDL_TEXTUREACCESS_STREAMING, frameRef.size().width, frameRef.size().height);
-    SDL_SetTextureBlendMode(rodTexture, SDL_BLENDMODE_BLEND);
-    if (validate_creation(rodTexture, "rodTexture")) {
-        cleanup(visionRender, visionWindow);
-        SDL_Quit();
-        return 1;
-    }
-    */
  #if defined(_DEBUG)
     
 #endif   
@@ -94,8 +84,14 @@ int main(int argc, char *args[])
     inputThisFrame = worldIn.getNextFrame();
 
 
-    Rod rodIn = Rod(inputThisFrame.size().height, inputThisFrame.size().width);
+    Rod rodIn = Rod();
     rodIn.startProcessing(visionRender);
+    
+    cv::Rect coneRoi = cv::Rect(200, 200, 200, 200);
+    Cone coneIn = Cone(coneRoi);
+    if (!coneIn.startProcessing(visionRender)) {
+        return 3;
+    }
 
     SDL_Texture* worldTexture = SDL_CreateTexture(worldRender, SDL_PIXELFORMAT_BGR24, SDL_TEXTUREACCESS_STREAMING, WORLD_WIDTH, WORLD_HEIGHT);
     SDL_SetTextureBlendMode(worldTexture, SDL_BLENDMODE_BLEND);
@@ -138,19 +134,22 @@ int main(int argc, char *args[])
             std::memcpy(worldPixels, inputThisFrame.data, inputThisFrame.step * inputThisFrame.rows);
             SDL_UnlockTexture(worldTexture);
             rodIn.digestInput(inputThisFrame);
-            rodIn.updateVisualDataState();
             rodIn.updateTexture();
             rodIn.renderState(visionRender);
+            coneIn.digestInput(&inputThisFrame);
+            coneIn.updateTexture();
+            coneIn.renderState(visionRender);
             SDL_RenderCopy(worldRender, worldTexture, NULL, NULL);
             renderTexture(worldTexture, worldRender, 0, 0);
             SDL_RenderPresent(worldRender);
             SDL_RenderPresent(visionRender);
-            SDL_Delay(10);
+            SDL_Delay(20);
         }
     }
 
     // Clean up.
-    rodIn.free();
+    //rodIn.free();
+    coneIn.free();
     cleanup(visionWindow, visionRender);
     SDL_Quit();
    

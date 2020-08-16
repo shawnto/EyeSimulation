@@ -1,9 +1,7 @@
 #include "rod.h"
 
 
-Rod::Rod(int texHeight, int texWidth) {
-	height = texHeight;
-	width = texWidth;
+Rod::Rod(){
 	texture = NULL;
 	pixels = NULL;
 	pitch = NULL;
@@ -23,7 +21,7 @@ void Rod::free() {
 
 bool Rod::startProcessing(SDL_Renderer* render) {
 
-	texture = SDL_CreateTexture(render, SDL_PIXELFORMAT_BGR24, SDL_TEXTUREACCESS_STREAMING, width, height);
+	texture = SDL_CreateTexture(render, SDL_PIXELFORMAT_BGR24, SDL_TEXTUREACCESS_STREAMING, this->WIDTH, this->HEIGHT);
     SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 	if (texture == NULL) {
 		return false;
@@ -54,7 +52,7 @@ bool Rod::updateTexture() {
 	if (!lockTexture()) {
 		return false;
 	}
-	std::memcpy(pixels, data.data, data.step * data.size().height);
+	std::memcpy(pixels, data.data, data.step * data.cols);
 	return unlockTexture();
 }
 
@@ -116,16 +114,13 @@ void Rod::diffMatrix(cv::Mat* data, cv::Mat* diff) {
 
 
 void Rod::digestInput(cv::Mat inputData) {
-	cv::Mat blurred, grayed;
-	//inputData.copyTo(diffed);
+	cv::Mat temp, blurred, grayed;
 	int kern = (blurSigma * 5) | 1;
-	cv::GaussianBlur(inputData, blurred, cv::Size(kern, kern), blurSigma, blurSigma);
+	inputData(viewPort).copyTo(data);
+	cv::GaussianBlur(data, blurred, cv::Size(kern, kern), blurSigma, blurSigma);
 	cv::cvtColor(blurred, grayed, cv::COLOR_BGR2GRAY, 1);
 	int from_to[] = { 0, 0, 0,1, 0,2 };
-	cv::mixChannels(&grayed, 1, &blurred, 1, from_to, 3);
-	// Rod shouldn't call this. Push this functionality to further down the pipeline.
-	//diffMatrix(&grayed, &diffed);
-	data = blurred;
+	cv::mixChannels(&grayed, 1, &data, 1, from_to, 3);
 }
 
 
@@ -134,5 +129,10 @@ void Rod::renderState(SDL_Renderer* render) {
 	if (!updateTexture()) {
 		return;
 	}
-    SDL_RenderCopy(render, texture, NULL, NULL);
+	SDL_Rect tmp;
+	tmp.x = viewPort.x;
+	tmp.y = viewPort.y;
+	tmp.w = viewPort.width;
+	tmp.h = viewPort.height;
+    SDL_RenderCopy(render, texture, NULL, &tmp);
 }

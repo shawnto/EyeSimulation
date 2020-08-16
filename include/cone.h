@@ -8,23 +8,12 @@
 /*
 Roughly simulate Rod Cells of eye.
 
-Citations:
-Grayscale formula from:
-http://www.realtimerendering.com/
-
+Can probably be abstracted with the Rod class, but explicitly defining for now.
 
 */
 
-
-
-class Rod {
+class Cone {
 private:
-	int HEIGHT = 400;
-	int WIDTH = 400;
-	int blurSigma = 4;
-
-	// Processes movement
-	//void checkMovement();
 
 
 	SDL_Texture* texture;
@@ -32,18 +21,16 @@ private:
 	void* pixels;
 	// texture pitch for streaming
 	int pitch;
-	// input data
+	// input data and cone's ROI.
 	cv::Mat data;
-
-	// rod viewPort
-	cv::Rect viewPort = cv::Rect(0, 0, this->WIDTH, this->HEIGHT);
+	cv::Rect roiBounds;
 	
 
 	
 
 public:
-	Rod();
-	~Rod();
+	Cone(cv::Rect roiBounds);
+	~Cone();
 
 	int height, width;
 	
@@ -54,10 +41,7 @@ public:
 	bool lockTexture();
 	bool unlockTexture();
 	bool updateTexture();
-	void digestInput(cv::Mat inputData);
+	void digestInput(cv::Mat* inputData);
 	// render current texture state to the given renderer
 	void renderState(SDL_Renderer* render);
-
-	bool Rod::hasDiff(cv::Mat* data, int x, int y);
-	void Rod::diffMatrix(cv::Mat* data, cv::Mat* diff);
 };
