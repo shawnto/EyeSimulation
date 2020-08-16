@@ -143,7 +143,7 @@ int main(int argc, char *args[])
             renderTexture(worldTexture, worldRender, 0, 0);
             SDL_RenderPresent(worldRender);
             SDL_RenderPresent(visionRender);
-            SDL_Delay(20);
+            SDL_Delay(75);
         }
     }
 

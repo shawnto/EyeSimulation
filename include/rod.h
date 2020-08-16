@@ -19,8 +19,8 @@ http://www.realtimerendering.com/
 
 class Rod {
 private:
-	int HEIGHT = 400;
-	int WIDTH = 400;
+	int HEIGHT = 800;
+	int WIDTH = 800;
 	int blurSigma = 4;
 
 	// Processes movement
