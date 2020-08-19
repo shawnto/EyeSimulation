@@ -8,11 +8,6 @@
 /*
 Roughly simulate Rod Cells of eye.
 
-Citations:
-Grayscale formula from:
-http://www.realtimerendering.com/
-
-
 */
 
 
@@ -22,7 +17,8 @@ private:
 	int HEIGHT = 800;
 	int WIDTH = 800;
 	int blurSigma = 4;
-
+	bool shouldRender = false;
+	
 	// Processes movement
 	//void checkMovement();
 
@@ -32,10 +28,8 @@ private:
 	void* pixels;
 	// texture pitch for streaming
 	int pitch;
-	// input data
-	cv::Mat data;
-
-	// rod viewPort
+	
+	// rod viewPort, for debugging/rendering mode
 	cv::Rect viewPort = cv::Rect(0, 0, this->WIDTH, this->HEIGHT);
 	
 
@@ -43,14 +37,17 @@ private:
 
 public:
 	Rod();
+	Rod(cv::Rect viewBounds);
 	~Rod();
 
-	int height, width;
-	
+	bool updatePending = true;
+	// input data
+	cv::Mat data, newInput;
+	cv::Rect viewBounds;
 	// free texture if exists
 	void free();
 	// init texture for the passed renderer and set values for streaming
-	bool startProcessing(SDL_Renderer* render);
+	bool initForRender(SDL_Renderer* render);
 	bool lockTexture();
 	bool unlockTexture();
 	bool updateTexture();
@@ -58,6 +55,6 @@ public:
 	// render current texture state to the given renderer
 	void renderState(SDL_Renderer* render);
 
-	bool Rod::hasDiff(cv::Mat* data, int x, int y);
-	void Rod::diffMatrix(cv::Mat* data, cv::Mat* diff);
+	bool hasDiff(cv::Mat* newData);
+	void diffMatrix(cv::Mat* data, cv::Mat* diff);
 };

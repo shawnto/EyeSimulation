@@ -21,27 +21,30 @@ private:
 	void* pixels;
 	// texture pitch for streaming
 	int pitch;
-	// input data and cone's ROI.
-	cv::Mat data;
-	cv::Rect roiBounds;
+
 	
 
 	
 
 public:
+	Cone();
 	Cone(cv::Rect roiBounds);
 	~Cone();
 
-	int height, width;
-	
+	bool updatePending = true;
+	// input data and cone's ROI.
+	cv::Mat data, newInput;
+	cv::Rect roiBounds;
 	// free texture if exists
 	void free();
 	// init texture for the passed renderer and set values for streaming
-	bool startProcessing(SDL_Renderer* render);
+	bool initForRender(SDL_Renderer* render);
 	bool lockTexture();
 	bool unlockTexture();
 	bool updateTexture();
 	void digestInput(cv::Mat* inputData);
+	bool hasDiff(cv::Mat* newData);
+	void diffMatrix(cv::Mat* diff);
 	// render current texture state to the given renderer
 	void renderState(SDL_Renderer* render);
 };

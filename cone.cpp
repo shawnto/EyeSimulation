@@ -1,11 +1,16 @@
 #include "cone.h"
 
+Cone::Cone() {
+	texture = NULL;
+	pixels = NULL;
+	pitch = NULL;
+	this->roiBounds = cv::Rect();
+}
 
 Cone::Cone(cv::Rect roiBounds){
 	texture = NULL;
 	pixels = NULL;
 	pitch = NULL;
-	data = NULL;
 	this->roiBounds = roiBounds;
 }
 
@@ -20,7 +25,7 @@ void Cone::free() {
 	}
 }
 
-bool Cone::startProcessing(SDL_Renderer* render) {
+bool Cone::initForRender(SDL_Renderer* render) {
 
 	texture = SDL_CreateTexture(render, SDL_PIXELFORMAT_BGR24, SDL_TEXTUREACCESS_STREAMING, roiBounds.width, roiBounds.height);
     SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
@@ -53,22 +58,41 @@ bool Cone::updateTexture() {
 	if (!lockTexture()) {
 		return false;
 	}
-	std::memcpy(pixels, data.data, data.step * data.cols);
+	std::memcpy(pixels, data.data, data.step * data.rows);
 	return unlockTexture();
+}
+
+bool Cone::hasDiff(cv::Mat* newData){
+	cv::Mat tmp;
+	//auto point = data->at<uchar>(cv::Point(x, y));
+	cv::absdiff(data, *newData, tmp);
+	return tmp.empty() == false;
+}
+
+
+void Cone::diffMatrix(cv::Mat* diff) {
+	cv::absdiff(*diff, data, newInput);
+	diff->copyTo(data);
 }
 
 
 void Cone::digestInput(cv::Mat* inputData) {
 	/*
-	Cone is a smaller but more detailed ROI of world. Get ROI, set texture for render from that.
+	Cone is a smaller but more detailed ROI of world. Get ROI, process data from that.
 	*/
-	
-	
-	auto tmp = inputData->operator()(roiBounds);
-	tmp.copyTo(data);
-	
-}
+	cv::Mat sample = inputData->operator()(roiBounds);
+	if (data.data == NULL) {
+		sample.copyTo(data);
+		updatePending = true;
+	}
+	else {
 
+		updatePending = hasDiff(&sample);
+		if(updatePending) {
+			diffMatrix(&sample);
+		}
+	}
+}
 
 
 void Cone::renderState(SDL_Renderer* render) {

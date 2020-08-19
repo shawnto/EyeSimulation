@@ -1,6 +1,7 @@
 .vs/
 
 *.vcxproj*
+packages*
 
 Debug/
 
