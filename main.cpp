@@ -127,15 +127,15 @@ int main(int argc, char *args[])
             //rodIn.updateTexture();
             //rodIn.renderState(visionRender);
             eye.digestInput(&inputThisFrame);
-            //if (eye.updatePending) {
-            eye.updateTexture();
-            eye.renderState(visionRender);
-            //}
+            if (eye.updatePending) {
+                eye.updateTexture();
+                eye.renderState(visionRender);
+            }
             SDL_RenderCopy(worldRender, worldTexture, NULL, NULL);
             //renderTexture(worldTexture, worldRender, 0, 0);
             SDL_RenderPresent(worldRender);
             SDL_RenderPresent(visionRender);
-            SDL_Delay(50);
+            SDL_Delay(500);
         }
     }
 

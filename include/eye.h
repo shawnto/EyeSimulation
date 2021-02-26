@@ -1,6 +1,8 @@
 #pragma once
 
 #include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/core/hal/interface.h>
 #include <SDL.h>
 #include "rod.h"
 #include "cone.h"

@@ -86,7 +86,6 @@ void Cone::digestInput(cv::Mat* inputData) {
 		updatePending = true;
 	}
 	else {
-
 		updatePending = hasDiff(&sample);
 		if(updatePending) {
 			diffMatrix(&sample);

@@ -12,7 +12,7 @@ Eye::Eye(int visWidth, int visHeight, int x, int y){
 	this->y = y;
 	viewPort = cv::Rect(x, y, visRangeWidth, visRangeHeight);
 	rods = Rod(viewPort);
-	cones = Cone(cv::Rect(visWidth / 4, visHeight / 4, visWidth / 4, visWidth / 4));
+	cones = Cone(cv::Rect(visWidth / 4, visHeight / 4, visWidth / 2, visWidth / 2));
 }
 
 Eye::~Eye() {
@@ -77,19 +77,22 @@ void Eye::digestInput(cv::Mat* inData) {
 	if (data.data == NULL) {
 		temp.copyTo(data);
 	}
-	cv::Mat rodTemp, coneTemp;
+	cv::Mat rodTemp(rods.data.rows, rods.data.cols, CV_8UC3), coneTemp(cones.data.rows, cones.data.cols, CV_8UC3);
 	if (rods.updatePending) {
 		cones.data.copyTo(coneTemp);
-		temp.copyTo(rodTemp);
-		int from_to[] = {  0, 0, 0,1, 0,2 };
-		cv::mixChannels(&rods.data, 1, &rodTemp, 1, from_to, 3);
+		int from_to[] = {  0, 0, 1,1, 1,2 };
+		cv::Mat rodData[] = { rods.data, rods.newInput};
+		cv::mixChannels(rodData, 2, &rodTemp, 1, from_to, 3);
 		updatePending = true;
+		rods.updatePending = false;
+
 	}
-	updatePending = cones.updatePending;
 	if (cones.updatePending) {
 		cones.data.copyTo(coneTemp);
 		updatePending = true;
+		cones.updatePending = false;
 	}
+	
 	rodTemp.copyTo(data);
 	coneTemp.copyTo(data(cones.roiBounds));
 

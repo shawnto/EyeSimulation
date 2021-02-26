@@ -73,7 +73,7 @@ bool Rod::hasDiff(cv::Mat* newData){
 
 
 void Rod::diffMatrix(cv::Mat* data, cv::Mat* diff) {
-	newInput = *diff - *data;
+	cv::absdiff(*diff, *data, newInput);
 	diff->copyTo(*data);
 }
 
@@ -82,7 +82,6 @@ void Rod::digestInput(cv::Mat inputData) {
 	cv::Mat temp, blurred;
 	int kern = (blurSigma * 5) | 1;
 	//inputData(viewPort).copyTo(temp);
-	
 	cv::cvtColor(inputData, temp, cv::COLOR_BGR2GRAY);
 	cv::GaussianBlur(temp, blurred, cv::Size(kern, kern), blurSigma, blurSigma);
 	if (data.data == NULL) {
@@ -91,6 +90,9 @@ void Rod::digestInput(cv::Mat inputData) {
 	if (hasDiff(&blurred)) {
 		updatePending = true;
 		diffMatrix(&data, &blurred);
+	}
+	else {
+		updatePending = false;
 	}
 	if (shouldRender) {
 		int from_to[] = { 0, 0, 0,1, 0,2 };
